@@ -1,54 +1,54 @@
-// backend/server.js (Updated with CORS fix)
-
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
 
-// Initialize Express App
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// --- CORS Configuration ---
-// We are specifying that only our frontend (running on localhost:5173)
-// is allowed to make requests to this backend.
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://smart-resume-screener-lemon.vercel.app'
+];
+
 const corsOptions = {
-  origin: 'http://localhost:5173',
-  optionsSuccessStatus: 200 
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  }
 };
-app.use(cors(corsOptions));
+
+app.use(cors(corsOptions)); 
 
 
-// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// API Routes
 const authRoutes = require('./routes/authRoutes');
 const resumeRoutes = require('./routes/resumeRoutes');
+
 app.use('/api/auth', authRoutes);
 app.use('/api/resumes', resumeRoutes);
 
-// Basic Route
 app.get('/', (req, res) => {
-  res.send('Smart Resume Screener API is running!');
+  res.send('Smart Resume Screener API is running live!');
 });
 
-// MongoDB Connection
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/resumeScreener';
 
-mongoose.connect(MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
+const MONGO_URI = process.env.MONGO_URI;
+
+mongoose.connect(MONGO_URI)
 .then(() => {
-  console.log('Successfully connected to MongoDB.');
-  // Start the server after successful DB connection
+  console.log('Successfully connected to MongoDB Atlas.');
   app.listen(PORT, () => {
     console.log(`Server is running on port: ${PORT}`);
   });
 })
 .catch(err => {
-  console.error('Connection error', err);
-  process.exit();
+  console.error('MongoDB connection error:', err);
+  process.exit(1);
 });
