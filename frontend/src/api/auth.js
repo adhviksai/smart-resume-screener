@@ -14,7 +14,7 @@ export const loginUser = async (email, password) => {
   return response.json();
 };
 
-export const signupUser = async (userData) => {
+export const registerUser = async (userData) => {
   const response = await fetch(`${AUTH_API_URL}/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -26,3 +26,4 @@ export const signupUser = async (userData) => {
   }
   return response.json();
 };
+
