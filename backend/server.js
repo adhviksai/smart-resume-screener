@@ -1,5 +1,3 @@
-// backend/server.js
-
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -11,16 +9,13 @@ const resumeRoutes = require('./routes/resumeRoutes');
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// --- CRITICAL FIX for DEPLOYMENT ---
-// We must explicitly list the domains that are allowed to make requests to our API.
 const allowedOrigins = [
-  'http://localhost:5173', // Your local frontend for development
-  'https://smart-resume-screener-5daxpb0ae-adhvik-sais-projects.vercel.app' // Your live Vercel frontend
+  'http://localhost:5173',
+  'https://smart-resume-screener-5daxpb0ae-adhvik-sais-projects.vercel.app' 
 ];
 
 const corsOptions = {
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     if (allowedOrigins.indexOf(origin) === -1) {
       const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
@@ -35,16 +30,13 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Basic Route
 app.get('/', (req, res) => {
   res.send('Smart Resume Screener API is running!');
 });
 
-// API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/resumes', resumeRoutes);
 
-// MongoDB Connection
 const MONGO_URI = process.env.MONGO_URI;
 
 if (!MONGO_URI) {
