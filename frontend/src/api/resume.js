@@ -1,35 +1,25 @@
-const API_URL = 'http://localhost:5001/api/resumes';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+const RESUME_API_URL = `${API_BASE_URL}/api/resumes`;
 
-export const uploadResume = async (file, token) => {
+export const analyzeResumeAPI = async (file, targetData, token) => {
   const formData = new FormData();
   formData.append('resume', file);
-  const response = await fetch(`${API_URL}/upload`, {
+  formData.append('targetRole', targetData.role);
+  formData.append('targetCompany', targetData.company);
+
+  const response = await fetch(`${RESUME_API_URL}/analyze`, {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${token}` },
     body: formData,
   });
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || 'Failed to upload resume');
-  }
-  return response.json();
-};
 
-export const analyzeResumeAPI = async (resumeId, token, targetData) => {
-  const response = await fetch(`${API_URL}/analyze/${resumeId}`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(targetData),
-  });
   if (!response.ok) {
     const errorData = await response.json();
     throw new Error(errorData.error || 'Failed to analyze resume');
   }
   return response.json();
 };
+
 
 export const rankResumesAPI = async (jobDetails, files, token) => {
   const formData = new FormData();
@@ -42,7 +32,7 @@ export const rankResumesAPI = async (jobDetails, files, token) => {
     formData.append('resumes', file);
   });
 
-  const response = await fetch(`${API_URL}/rank`, {
+  const response = await fetch(`${RESUME_API_URL}/rank`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -54,30 +44,6 @@ export const rankResumesAPI = async (jobDetails, files, token) => {
     const errorData = await response.json();
     throw new Error(errorData.error || 'Failed to rank resumes');
   }
-
   return response.json();
 };
 
-export const getResumesForRecruiter = async (token) => {
-    const response = await fetch(API_URL, {
-        method: 'GET',
-        headers: { 'Authorization': `Bearer ${token}` },
-    });
-    if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to fetch resumes');
-    }
-    return response.json();
-};
-
-export const deleteResumeAPI = async (resumeId, token) => {
-    const response = await fetch(`${API_URL}/${resumeId}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` },
-    });
-    if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to delete resume');
-    }
-    return response.json();
-};
