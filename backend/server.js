@@ -3,46 +3,48 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
 
-const authRoutes = require('./routes/authRoutes');
-const resumeRoutes = require('./routes/resumeRoutes');
-
+// Initialize Express App
 const app = express();
 const PORT = process.env.PORT || 5001;
 
+// --- CRITICAL FIX for Production CORS ---
 const allowedOrigins = [
-  'http://localhost:5173',
-  'https://smart-resume-screener-5daxpb0ae-adhvik-sais-projects.vercel.app' 
+    'http://localhost:5173', // Your local frontend
+    'https://smart-resume-screener-5daxpb0ae-adhvik-sais-projects.vercel.app' // Your Vercel frontend URL
 ];
 
 const corsOptions = {
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-      return callback(new Error(msg), false);
+    origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) === -1) {
+            const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+            return callback(new Error(msg), false);
+        }
+        return callback(null, true);
     }
-    return callback(null, true);
-  },
-  credentials: true,
 };
 
 app.use(cors(corsOptions));
+// ------------------------------------
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.get('/', (req, res) => {
-  res.send('Smart Resume Screener API is running!');
-});
+// API Routes
+const authRoutes = require('./routes/authRoutes');
+const resumeRoutes = require('./routes/resumeRoutes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/resumes', resumeRoutes);
 
-const MONGO_URI = process.env.MONGO_URI;
+// Basic Route
+app.get('/', (req, res) => {
+  res.send('Smart Resume Screener API is running!');
+});
 
-if (!MONGO_URI) {
-    console.error("FATAL ERROR: MONGO_URI is not defined.");
-    process.exit(1);
-}
+// MongoDB Connection
+const MONGO_URI = process.env.MONGO_URI;
 
 mongoose.connect(MONGO_URI)
 .then(() => {
@@ -52,7 +54,7 @@ mongoose.connect(MONGO_URI)
   });
 })
 .catch(err => {
-  console.error('MongoDB connection error:', err);
-  process.exit(1);
+  console.error('Connection error', err);
+  process.exit();
 });
 
