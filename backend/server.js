@@ -9,8 +9,8 @@ const PORT = process.env.PORT || 5001;
 
 // --- CRITICAL FIX for Production CORS ---
 const allowedOrigins = [
-    'http://localhost:5173', // Your local frontend
-    'https://smart-resume-screener-5daxpb0ae-adhvik-sais-projects.vercel.app' // Your Vercel frontend URL
+    'http://localhost:5173', // Your local frontend for development
+    'https://smart-resume-screener-5daxpb0ae-adhvik-sais-projects.vercel.app' // YOUR LIVE VERCEL URL
 ];
 
 const corsOptions = {
@@ -38,7 +38,7 @@ const resumeRoutes = require('./routes/resumeRoutes');
 app.use('/api/auth', authRoutes);
 app.use('/api/resumes', resumeRoutes);
 
-// Basic Route
+// Basic Route for testing
 app.get('/', (req, res) => {
   res.send('Smart Resume Screener API is running!');
 });
